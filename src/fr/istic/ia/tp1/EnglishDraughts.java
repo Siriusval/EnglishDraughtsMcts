@@ -1,15 +1,8 @@
 package fr.istic.ia.tp1;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-
-import fr.istic.ia.tp1.Game.PlayerId;
 
 /**
  * Implementation of the English Draughts game.
@@ -198,8 +191,68 @@ public class EnglishDraughts extends Game {
 		//    Use recursive calls to explore all multiple capture possibilities
 		// - one function that returns the displacement moves from a given position (without capture)
 		//
-		ArrayList<Move> moves = new ArrayList<Move>();
+		ArrayList<Move> moves = new ArrayList<>();
 		return moves;
+	}
+
+
+	/**
+	 * Generate all possible displacement moves for the player
+	 * @return the list of possible displacement moves
+	 */
+	private List<Move> displacementMoves() {
+		ArrayList<Move> moves = new ArrayList<>();
+
+		for(int pawn : this.myPawns()){
+
+			//If white (or if king), check move up
+			if(this.board.isWhite(pawn) || this.board.isKing(pawn)){
+				int upLeftTile = this.board.neighborUpLeft(pawn);
+				int upRightTile = this.board.neighborUpRight(pawn);
+
+				//if free
+				if(this.board.isEmpty(upLeftTile)){
+					//Create a move	& add it to list
+					moves.add(createAMove(pawn, upLeftTile));
+				}
+
+				if(this.board.isEmpty(upRightTile)){
+					//Create a move	& add it to list
+					moves.add(createAMove(pawn, upRightTile));
+				}
+
+			}
+			//If black (or if king), check move down
+			if(this.board.isBlack(pawn) || this.board.isKing(pawn)){
+				int downLeftTile = this.board.neighborDownLeft(pawn);
+				int downRightTile = this.board.neighborDownRight(pawn);
+
+				//if free
+				if(this.board.isEmpty(downLeftTile)){
+					//Create a move	& add it to list
+					moves.add(createAMove(pawn, downLeftTile));
+				}
+
+				//if free
+				if(this.board.isEmpty(downRightTile)){
+					//Create a move	& add it to list
+					moves.add(createAMove(pawn, downRightTile));
+				}
+			}
+		}
+		return moves;
+	}
+
+	/**
+	 * Create a move will create a DraughtMove Object
+	 * @param start, the start position
+	 * @param destination, the destination position
+	 */
+	private Move createAMove( int start, int destination) {
+		DraughtsMove dMove = new DraughtsMove();
+		dMove.add(start);
+		dMove.add(destination);
+		return dMove;
 	}
 
 	@Override
