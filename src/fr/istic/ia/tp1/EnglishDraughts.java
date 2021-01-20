@@ -297,14 +297,17 @@ public class EnglishDraughts extends Game {
 	 */
 	@Override
 	public PlayerId winner() {
-		//
-		// TODO implement winner
-		//
-		
+
 		// return the winner ID if possible
-		
+		if(this.myPawns().size() == 0 || this.possibleMoves().size()==0){
+			return this.playerId == PlayerId.ONE ? PlayerId.TWO : PlayerId.ONE;
+		}
+
 		// return PlayerId.NONE if the game is null
-		
+		else if (this.nbKingMovesWithoutCapture == 25){
+			return PlayerId.NONE;
+		}
+
 		// Return null is the game has not ended yet
 		return null;
 	}
