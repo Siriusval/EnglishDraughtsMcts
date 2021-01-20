@@ -151,7 +151,7 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isAdversary(int square) {
-		return !isEmpty(square) && !this.isMine(square);
+		return !this.isEmpty(square) && !this.isMine(square);
 	}
 	
 	/** 
