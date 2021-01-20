@@ -142,9 +142,7 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isEmpty(int square) {
-		//
-		// TODO isEmpty
-		//
+		return this.board.isEmpty(square);
 	}
 	
 	/** 
@@ -153,9 +151,15 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isAdversary(int square) {
-		//
-		// TODO isAdversary
-		//
+		if (!isEmpty(square)){
+			if(playerId==PlayerId.ONE){ //si White joue
+				return board.isBlack(square); //regarde si c'est Black
+			}
+			else{ //si Black joue
+				return board.isWhite(square);
+			}
+		}
+		return false;
 	}
 	
 	/** 
@@ -164,9 +168,15 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isMine(int square) {
-		//
-		// TODO isMine
-		//
+		if (!isEmpty(square)){
+			if(playerId==PlayerId.ONE){ //si White joue
+				return board.isWhite(square); //regarde si c'est White
+			}
+			else{ //si Black joue
+				return board.isBlack(square);
+			}
+		}
+		return false;
 	}
 	
 	/** 
@@ -174,9 +184,12 @@ public class EnglishDraughts extends Game {
 	 * @return The list of current player pawn positions
 	 */
 	ArrayList<Integer> myPawns() {
-		//
-		// TODO myPawns
-		//
+		if(playerId==PlayerId.ONE){ //si le joueur White joue
+			return board.getWhitePawns();
+		}
+		else{
+			return board.getBlackPawns();
+		}
 	}
 	
 	
