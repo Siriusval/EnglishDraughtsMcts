@@ -64,6 +64,22 @@ public class EnglishDraughts extends Game {
 			}
 			return sb.toString();
 		}
+
+		/**
+		 * Get first element of DraughtsMove
+		 * @return the first element
+		 */
+		public int getStartPosition(){
+			return this.get(0);
+		}
+
+		/**
+		 * Get last element of DraughtsMove
+		 * @return the last element
+		 */
+		public int getEndPosition(){
+			return this.get(this.size()-1);
+		}
 	}
 	
 	/**
@@ -211,12 +227,12 @@ public class EnglishDraughts extends Game {
 				int upRightTile = this.board.neighborUpRight(pawn);
 
 				//if free (check != 0 if in bounds)
-				if(upLeftTile!=0 && this.board.isEmpty(upLeftTile)){
+				if(this.board.tileExist(upLeftTile) && this.board.isEmpty(upLeftTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, upLeftTile));
 				}
 
-				if(upRightTile!=0 && this.board.isEmpty(upRightTile)){
+				if(this.board.tileExist(upRightTile) && this.board.isEmpty(upRightTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, upRightTile));
 				}
@@ -228,13 +244,13 @@ public class EnglishDraughts extends Game {
 				int downRightTile = this.board.neighborDownRight(pawn);
 
 				//if free
-				if(downLeftTile!= 0 && this.board.isEmpty(downLeftTile)){
+				if(this.board.tileExist(downLeftTile) && this.board.isEmpty(downLeftTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, downLeftTile));
 				}
 
 				//if free
-				if(downRightTile != 0 && this.board.isEmpty(downRightTile)){
+				if(this.board.tileExist(downRightTile) && this.board.isEmpty(downRightTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, downRightTile));
 				}
@@ -255,6 +271,24 @@ public class EnglishDraughts extends Game {
 		return dMove;
 	}
 
+	/*
+	NOTE
+	Si j'ai bien compris, le move doit etre possible avant qu'il soit passé en parametre
+	 */
+
+	/**
+	 * Play method
+	 * Check if (in that order) :
+	 * - Player is valid
+	 * - Convert chosen move to DraughtsMove
+	 * - Move pawn
+	 * - Check if adversary pawn(s) captured
+	 * - (optional) Promote king if needed
+	 * - Change playerId for next player
+	 * - Increment number of turn
+	 * - (optional) Increment nbKingMovesWithoutCapture if needed
+	 * @param aMove
+	 */
 	@Override
 	public void play(Move aMove) {
 		// Player should be valid
@@ -265,21 +299,47 @@ public class EnglishDraughts extends Game {
 			return;
 		// Cast and apply the move
 		DraughtsMove move = (DraughtsMove) aMove;
-		
-		
-		//
-		// TODO implement play
-		//
-		
+
+		//init state to check "nbKingMovesWithoutCapture" later
+		boolean hasBeenCaptured = false; //Keep track if a pawn was captured
+		boolean isKing = this.board.isKing(move.getStartPosition()); //check if the pawn is king before turn
+
 		// Move pawn and capture opponents
-		
+		for(int i = 1; i < move.size(); i++){
+			int startTile = move.get(i-1);
+			int destTile = move.get(i);
+			//move
+			this.board.movePawn(startTile,destTile);
+
+			//check if pawn exist in between
+			int inBetweenTile = this.board.squareBetween(startTile,destTile);
+			//take it if exist
+			if (this.board.tileExist(inBetweenTile) && !this.board.isEmpty(inBetweenTile)){
+				this.board.removePawn(inBetweenTile);
+				hasBeenCaptured = true;
+			}
+		}
+
+
 		// Promote to king if the pawn ends on the opposite of the board
+		int currentTile = move.getEndPosition();
+		if(this.playerId.equals(PlayerId.ONE) && this.board.lineOfSquare(currentTile) == 0){
+			this.board.crownPawn(currentTile);
+		}
+		else if(this.playerId.equals(PlayerId.TWO) && this.board.lineOfSquare(currentTile) == this.board.size-1){
+			this.board.crownPawn(currentTile);
+		}
 		
 		// Next player
+		this.playerId = getAdversaryId();
 		
 		// Update nbTurn
+		nbTurn++;
 		
 		// Keep track of successive moves with kings without capture
+		if(isKing && !hasBeenCaptured){
+			nbKingMovesWithoutCapture++;
+		}
 
 	}
 
@@ -300,7 +360,7 @@ public class EnglishDraughts extends Game {
 
 		// return the winner ID if possible
 		if(this.myPawns().size() == 0 || this.possibleMoves().size()==0){
-			return this.playerId == PlayerId.ONE ? PlayerId.TWO : PlayerId.ONE;
+			return getAdversaryId();
 		}
 
 		// return PlayerId.NONE if the game is null
@@ -310,5 +370,13 @@ public class EnglishDraughts extends Game {
 
 		// Return null is the game has not ended yet
 		return null;
+	}
+
+	/**
+	 * Get the id of the next player
+	 * @return ONE if TWO, and TWO if ONE
+	 */
+	private PlayerId getAdversaryId(){
+		return this.playerId == PlayerId.ONE ? PlayerId.TWO : PlayerId.ONE;
 	}
 }
