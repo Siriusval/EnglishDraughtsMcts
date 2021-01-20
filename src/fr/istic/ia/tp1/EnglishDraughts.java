@@ -151,15 +151,7 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isAdversary(int square) {
-		if (!isEmpty(square)){
-			if(playerId==PlayerId.ONE){ //si White joue
-				return board.isBlack(square); //regarde si c'est Black
-			}
-			else{ //si Black joue
-				return board.isWhite(square);
-			}
-		}
-		return false;
+		return !this.isMine(square);
 	}
 	
 	/** 
@@ -168,15 +160,12 @@ public class EnglishDraughts extends Game {
 	 * @return
 	 */
 	boolean isMine(int square) {
-		if (!isEmpty(square)){
-			if(playerId==PlayerId.ONE){ //si White joue
-				return board.isWhite(square); //regarde si c'est White
-			}
-			else{ //si Black joue
-				return board.isBlack(square);
-			}
+		if(this.playerId.equals(PlayerId.ONE)){
+			return this.board.isWhite(square);
 		}
-		return false;
+		else{
+			return this.board.isBlack(square);
+		}
 	}
 	
 	/** 
@@ -184,11 +173,11 @@ public class EnglishDraughts extends Game {
 	 * @return The list of current player pawn positions
 	 */
 	ArrayList<Integer> myPawns() {
-		if(playerId==PlayerId.ONE){ //si le joueur White joue
-			return board.getWhitePawns();
+		if(this.playerId.equals(PlayerId.ONE)){
+			return this.board.getWhitePawns();
 		}
 		else{
-			return board.getBlackPawns();
+			return this.board.getBlackPawns();
 		}
 	}
 	
@@ -237,7 +226,7 @@ public class EnglishDraughts extends Game {
 		
 		// Update nbTurn
 		
-		// Keep track of successive moves with kings wthout capture
+		// Keep track of successive moves with kings without capture
 
 	}
 
