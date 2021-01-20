@@ -210,13 +210,13 @@ public class EnglishDraughts extends Game {
 				int upLeftTile = this.board.neighborUpLeft(pawn);
 				int upRightTile = this.board.neighborUpRight(pawn);
 
-				//if free
-				if(this.board.isEmpty(upLeftTile)){
+				//if free (check != 0 if in bounds)
+				if(upLeftTile!=0 && this.board.isEmpty(upLeftTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, upLeftTile));
 				}
 
-				if(this.board.isEmpty(upRightTile)){
+				if(upRightTile!=0 && this.board.isEmpty(upRightTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, upRightTile));
 				}
@@ -228,13 +228,13 @@ public class EnglishDraughts extends Game {
 				int downRightTile = this.board.neighborDownRight(pawn);
 
 				//if free
-				if(this.board.isEmpty(downLeftTile)){
+				if(downLeftTile!= 0 && this.board.isEmpty(downLeftTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, downLeftTile));
 				}
 
 				//if free
-				if(this.board.isEmpty(downRightTile)){
+				if(downRightTile != 0 && this.board.isEmpty(downRightTile)){
 					//Create a move	& add it to list
 					moves.add(createAMove(pawn, downRightTile));
 				}
