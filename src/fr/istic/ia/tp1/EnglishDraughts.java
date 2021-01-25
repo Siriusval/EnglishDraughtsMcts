@@ -209,10 +209,10 @@ public class EnglishDraughts extends Game {
 			int upRightTile = this.board.neighborUpRight(start);
 			int upRightx2Tile = this.board.neighborUpRight(upRightTile);
 
-			if(this.isAdversary(upLeftTile) && this.isEmpty(upLeftx2Tile)){ //up left capture condition
+			if(this.isAdversary(upLeftTile) && this.isEmpty(upLeftx2Tile) && (upLeftTile==0) && (upLeftx2Tile==0)){ //up left capture condition
 				result.add(upLeftx2Tile);
 			}
-			if(this.isAdversary(upRightTile) && this.isEmpty(upRightx2Tile)){ //up right capture condition
+			if(this.isAdversary(upRightTile) && this.isEmpty(upRightx2Tile) && (upRightTile==0) && (upRightx2Tile==0)){ //up right capture condition
 				result.add(upRightx2Tile);
 			}
 		}
@@ -223,10 +223,10 @@ public class EnglishDraughts extends Game {
 			int downRightTile = this.board.neighborDownRight(start);
 			int downRightx2Tile = this.board.neighborDownRight(downRightTile);
 
-			if(this.isAdversary(downLeftTile) && this.isEmpty(downLeftx2Tile)){ //down left capture condition
+			if(this.isAdversary(downLeftTile) && this.isEmpty(downLeftx2Tile) && (downLeftTile==0) && (downLeftx2Tile==0)){ //down left capture condition
 				result.add(downLeftx2Tile);
 			}
-			if(this.isAdversary(downRightTile) && this.isEmpty(downRightx2Tile)){ //down right capture condition
+			if(this.isAdversary(downRightTile) && this.isEmpty(downRightx2Tile) && (downRightTile==0) && (downRightx2Tile==0)){ //down right capture condition
 				result.add(downRightx2Tile);
 			}
 		}
