@@ -186,7 +186,7 @@ public class TestEnglishDraughts {
 		draughts.play(newMove(draughts, asList(18,11,4)));
 		
 		assertTrue(draughts.board.isEmpty(18)); //"Leave 18"
-		assertTrue( draughts.board.isEmpty(15)); //"Remove adversary from 15"
+		assertTrue(draughts.board.isEmpty(15)); //"Remove adversary from 15"
 		assertTrue(draughts.board.isEmpty(11)); //"Pass by 11"
 		assertTrue( draughts.board.isEmpty(8)); //"Remove adversary from 8"
 		assertEquals(CheckerBoard.WHITE_KING, draughts.board.get(4)); //"Finish in 4 and get crowned"

@@ -1,9 +1,7 @@
 package fr.istic.ia.tp1;
 
-import java.awt.dnd.DragGestureEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * Implementation of the English Draughts game.
@@ -160,7 +158,8 @@ public class EnglishDraughts extends Game {
 		ArrayList<Move> result = new ArrayList<>();
 
 		for(int pawn : myPawns()){	//pour chaque pion du joueur actuel
-			result.addAll(possibleCatchMoves(pawn, board.getCheckerType(pawn)));
+
+			result.addAll(possibleCatchMoves(pawn, board.getCheckerType(pawn),new HashSet<Integer>()));
 		}
 
 		if(result.isEmpty()){ //si aucune capture possible
@@ -177,21 +176,32 @@ public class EnglishDraughts extends Game {
 	 * Computes all the possible catch moves, simple and multiple ones
 	 * @param pos position of current pawn
 	 * @param checkerType , if the checker is white, black, king...
+	 * @param catchedChecker , list of checker already taken
 	 * @return list of possible capture moves
 	 */
-	private List<Move> possibleCatchMoves(int pos, byte checkerType){
+	private List<Move> possibleCatchMoves(int pos, byte checkerType, Set<Integer> catchedChecker){
 		List<Move> result = new ArrayList<>();
-		List<Integer> destJump = destJumpList(pos,checkerType); //list of capture directions
+		List<Integer> destJump = destJumpList(pos,checkerType,catchedChecker); //list of capture directions
+
+		//Remove already explored solutions
+		destJump.removeAll(catchedChecker);
 
 		for(int dest : destJump){ //pour toutes les captures possibles
-			List<Move> movesPrisesDest = possibleCatchMoves(dest, checkerType); //get to know if it can be a multiple move
+
+			//Copy arrayList to propagate list of catched checkers, different for each move
+			Set<Integer> catchedCheckerPropagate =  new HashSet<>(catchedChecker);
+			catchedCheckerPropagate.add(dest);
+
+			//get to know if it can be a multiple move
+			List<Move> movesPrisesDest = possibleCatchMoves(dest, checkerType,catchedCheckerPropagate);
+
 			if (movesPrisesDest.isEmpty()){ //si mono capture
-				result.add(createAMove(pos,dest));
+				result.add(createAMove(pos,dest)); //add move to list
 			}
 			else{ //multiple capture
 				for(Move moveDest : movesPrisesDest){
 					DraughtsMove mv = (DraughtsMove) moveDest;
-					result.add(createAMultipleMove(pos,mv));
+					result.add(createAMultipleMove(pos,mv)); //prepend the current pos to the next move
 				}
 			}
 		}
@@ -203,41 +213,56 @@ public class EnglishDraughts extends Game {
 	 * (check diagonal, max array.size = 4)
 	 * Helper for possibleCatchMoves
 	 * @param start actual pawn square
+	 * @param checkerType , if the checker is white, black, king...
+	 * @param catchedChecker , list of checker already taken
 	 * @return list of all capture positions
 	 */
-	private List<Integer> destJumpList(int start, byte checkerType){
+	private List<Integer> destJumpList(int start, byte checkerType, Set<Integer> catchedChecker){
 		List<Integer> result = new ArrayList<>();
 
-		if(checkerType==CheckerBoard.WHITE_CHECKER || checkerType==CheckerBoard.WHITE_KING || checkerType==CheckerBoard.BLACK_KING){ //if it's white's turn or a king
+		//if it's white's turn or a king
+		if(checkerType==CheckerBoard.WHITE_CHECKER || checkerType==CheckerBoard.WHITE_KING || checkerType==CheckerBoard.BLACK_KING) {
 			int upLeftTile = this.board.neighborUpLeft(start);
 			int upLeftx2Tile = this.board.neighborUpLeft(upLeftTile);
 			int upRightTile = this.board.neighborUpRight(start);
 			int upRightx2Tile = this.board.neighborUpRight(upRightTile);
 
-			//Check if both tiles exist, and the first should be an adversary, the second should be empty
-			if(board.tileExist(upLeftTile) && this.isAdversary(upLeftTile) && board.tileExist(upLeftx2Tile) && this.isEmpty(upLeftx2Tile)){ //up left capture condition
-				result.add(upLeftx2Tile);
-			}
-			if(board.tileExist(upRightTile) &&this.isAdversary(upRightTile) && board.tileExist(upRightx2Tile) && this.isEmpty(upRightx2Tile)){ //up right capture condition
-				result.add(upRightx2Tile);
-			}
+			//Check if a catch can be made
+			result.addAll(catchPosIfExist(catchedChecker, upLeftTile, upLeftx2Tile));
+			result.addAll(catchPosIfExist(catchedChecker, upRightTile, upRightx2Tile));
 		}
 
-		if(checkerType==CheckerBoard.BLACK_CHECKER || checkerType==CheckerBoard.BLACK_KING || checkerType==CheckerBoard.WHITE_KING){ //if it's black turn or a king
+//if it's black turn or a king
+		if(checkerType==CheckerBoard.BLACK_CHECKER || checkerType==CheckerBoard.BLACK_KING || checkerType==CheckerBoard.WHITE_KING){
 			int downLeftTile = this.board.neighborDownLeft(start);
 			int downLeftx2Tile = this.board.neighborDownLeft(downLeftTile);
 			int downRightTile = this.board.neighborDownRight(start);
 			int downRightx2Tile = this.board.neighborDownRight(downRightTile);
 
-			if(board.tileExist(downLeftTile) && this.isAdversary(downLeftTile) && board.tileExist(downLeftx2Tile) &&this.isEmpty(downLeftx2Tile) ){ //down left capture condition
-				result.add(downLeftx2Tile);
-			}
-			if(board.tileExist(downRightTile) && this.isAdversary(downRightTile) && board.tileExist(downRightx2Tile) && this.isEmpty(downRightx2Tile)){ //down right capture condition
-				result.add(downRightx2Tile);
-			}
+			result.addAll(catchPosIfExist(catchedChecker, downLeftTile, downLeftx2Tile));
+			result.addAll(catchPosIfExist(catchedChecker, downRightTile, downRightx2Tile));
 		}
 
 		return result;
+	}
+
+	/**
+	 * If the checker exit and can be catched, return it
+	 * @param catchedChecker, the list of already catched checker
+	 * @param diagTile, the tile in diagonal, should be adversary
+	 * @param diagx2Tile, the tile after (still in diagonal), shoulb be empty
+	 * @return the list containing the move (so it can be added in destJumpList)
+	 */
+	private List<Integer> catchPosIfExist(Set<Integer> catchedChecker, int diagTile, int diagx2Tile) {
+		List result = new ArrayList();
+		//Check if tile has't been catched already in this move
+		if (!catchedChecker.contains(diagTile)) {
+			//Check if both tiles exist, and the first should be an adversary, the second should be empty
+			if (board.tileExist(diagTile) && this.isAdversary(diagTile) && board.tileExist(diagx2Tile) && this.isEmpty(diagx2Tile)) { //up left capture condition
+				result.add(diagx2Tile);
+			}
+		}
+		return  result;
 	}
 
 	/**
@@ -359,10 +384,10 @@ public class EnglishDraughts extends Game {
 
 		// Promote to king if the pawn ends on the opposite of the board
 		int currentTile = move.getEndPosition();
-		if(this.playerId.equals(PlayerId.ONE) && this.board.lineOfSquare(currentTile) == 0){
+		if(this.playerId.equals(PlayerId.ONE) && this.board.lineOfSquare(currentTile) == this.board.size-1){
 			this.board.crownPawn(currentTile);
 		}
-		else if(this.playerId.equals(PlayerId.TWO) && this.board.lineOfSquare(currentTile) == this.board.size-1){
+		else if(this.playerId.equals(PlayerId.TWO) && this.board.lineOfSquare(currentTile) == 0){
 			this.board.crownPawn(currentTile);
 		}
 
