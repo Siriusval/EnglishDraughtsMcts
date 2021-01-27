@@ -76,8 +76,17 @@ public class MonteCarloTreeSearch {
 			// TODO implement updateStats for a node
 			//
 		}
+
+		boolean isLeaf(){
+			return this.children.isEmpty();
+		}
 	}
-	
+
+	private EvalNode nodeChoice(ArrayList<EvalNode> children){
+			//TODO
+		return null;
+	}
+
 	/**
 	 * A class to hold the results of the rollout phase
 	 * Keeps the number of wins for each player and the number of simulations.
@@ -184,6 +193,11 @@ public class MonteCarloTreeSearch {
 		//
 		return null;
 	}
+
+	public EvalNode expand(EvalNode parent){
+		//TODO
+		return null;
+	}
 	
 	/**
 	 * Perform nbRuns rollouts from a game state, and returns the winning statistics for both players.
@@ -230,20 +244,34 @@ public class MonteCarloTreeSearch {
 	public boolean evaluateTreeOnce() {
 		//
 		// TODO implement MCTS evaluateTreeOnce
+		// TODO: Ask qs to teacher for return and rollout 1
 		//
 		
 		// List of visited nodes
+		List<EvalNode> visitedNodes = new ArrayList<>();
 		
 		// Start from the root
+		EvalNode node = this.root;
+		visitedNodes.add(node);
 		
 		// Selection (with UCT tree policy)
-		
-		// Expand node
-		
+		while(!node.isLeaf()){
+			//tree policy to choose a child
+			node = nodeChoice(node.children);
+			visitedNodes.add(node);
+		}
+
+		// Expand node : create a random new child
+		EvalNode newChild = expand(node);
+		visitedNodes.add(newChild);
+
 		// Simulate from new node(s)
-		
+		RolloutResults valeur =  rollOut(newChild.game,1); //1 ?
+
 		// Backpropagate results
-		
+		for(EvalNode vNode : visitedNodes){
+			vNode.updateStats(valeur);
+		}
 		// Return false if tree evaluation should continue
 		return false;
 	}
