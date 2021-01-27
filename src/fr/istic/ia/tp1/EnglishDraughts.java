@@ -14,7 +14,7 @@ public class EnglishDraughts extends Game {
 	/**
 	 * The checker board
 	 */
-	CheckerBoard board;
+	public CheckerBoard board;
 
 	/**
 	 * The {@link PlayerId} of the current player
@@ -160,7 +160,7 @@ public class EnglishDraughts extends Game {
 		ArrayList<Move> result = new ArrayList<>();
 
 		for(int pawn : myPawns()){	//pour chaque pion du joueur actuel
-			result.addAll(possibleCatchMoves(pawn));
+			result.addAll(possibleCatchMoves(pawn, board.getCheckerType(pawn)));
 		}
 
 		if(result.isEmpty()){ //si aucune capture possible
@@ -172,17 +172,19 @@ public class EnglishDraughts extends Game {
 		return result;
 	}
 
+	//TODO : add checker type and liste of captured checker as parameter
 	/**
-	 * Computes all the possible catch moves
+	 * Computes all the possible catch moves, simple and multiple ones
 	 * @param pos position of current pawn
+	 * @param checkerType , if the checker is white, black, king...
 	 * @return list of possible capture moves
 	 */
-	private List<Move> possibleCatchMoves(int pos){
+	private List<Move> possibleCatchMoves(int pos, byte checkerType){
 		List<Move> result = new ArrayList<>();
-		List<Integer> destJump = destJumpList(pos); //list of capture directions
+		List<Integer> destJump = destJumpList(pos,checkerType); //list of capture directions
 
 		for(int dest : destJump){ //pour toutes les captures possibles
-			List<Move> movesPrisesDest = possibleCatchMoves(dest);
+			List<Move> movesPrisesDest = possibleCatchMoves(dest, checkerType); //get to know if it can be a multiple move
 			if (movesPrisesDest.isEmpty()){ //si mono capture
 				result.add(createAMove(pos,dest));
 			}
@@ -197,37 +199,40 @@ public class EnglishDraughts extends Game {
 	}
 
 	/**
-	 * Computes all capture positions possible from the given square
+	 * Computes all simple capture positions possible from the given square
+	 * (check diagonal, max array.size = 4)
+	 * Helper for possibleCatchMoves
 	 * @param start actual pawn square
 	 * @return list of all capture positions
 	 */
-	private List<Integer> destJumpList(int start){
+	private List<Integer> destJumpList(int start, byte checkerType){
 		List<Integer> result = new ArrayList<>();
 
-		if(this.board.isWhite(start) || this.board.isKing(start)){ //if it's white's turn or a king
+		if(checkerType==CheckerBoard.WHITE_CHECKER || checkerType==CheckerBoard.WHITE_KING || checkerType==CheckerBoard.BLACK_KING){ //if it's white's turn or a king
 			int upLeftTile = this.board.neighborUpLeft(start);
 			int upLeftx2Tile = this.board.neighborUpLeft(upLeftTile);
 			int upRightTile = this.board.neighborUpRight(start);
 			int upRightx2Tile = this.board.neighborUpRight(upRightTile);
 
-			if(this.isAdversary(upLeftTile) && this.isEmpty(upLeftx2Tile) && (upLeftTile==0) && (upLeftx2Tile==0)){ //up left capture condition
+			//Check if both tiles exist, and the first should be an adversary, the second should be empty
+			if(board.tileExist(upLeftTile) && this.isAdversary(upLeftTile) && board.tileExist(upLeftx2Tile) && this.isEmpty(upLeftx2Tile)){ //up left capture condition
 				result.add(upLeftx2Tile);
 			}
-			if(this.isAdversary(upRightTile) && this.isEmpty(upRightx2Tile) && (upRightTile==0) && (upRightx2Tile==0)){ //up right capture condition
+			if(board.tileExist(upRightTile) &&this.isAdversary(upRightTile) && board.tileExist(upRightx2Tile) && this.isEmpty(upRightx2Tile)){ //up right capture condition
 				result.add(upRightx2Tile);
 			}
 		}
 
-		if(this.board.isBlack(start) || this.board.isKing(start)){ //if it's black turn or a king
+		if(checkerType==CheckerBoard.BLACK_CHECKER || checkerType==CheckerBoard.BLACK_KING || checkerType==CheckerBoard.WHITE_KING){ //if it's black turn or a king
 			int downLeftTile = this.board.neighborDownLeft(start);
 			int downLeftx2Tile = this.board.neighborDownLeft(downLeftTile);
 			int downRightTile = this.board.neighborDownRight(start);
 			int downRightx2Tile = this.board.neighborDownRight(downRightTile);
 
-			if(this.isAdversary(downLeftTile) && this.isEmpty(downLeftx2Tile) && (downLeftTile==0) && (downLeftx2Tile==0)){ //down left capture condition
+			if(board.tileExist(downLeftTile) && this.isAdversary(downLeftTile) && board.tileExist(downLeftx2Tile) &&this.isEmpty(downLeftx2Tile) ){ //down left capture condition
 				result.add(downLeftx2Tile);
 			}
-			if(this.isAdversary(downRightTile) && this.isEmpty(downRightx2Tile) && (downRightTile==0) && (downRightx2Tile==0)){ //down right capture condition
+			if(board.tileExist(downRightTile) && this.isAdversary(downRightTile) && board.tileExist(downRightx2Tile) && this.isEmpty(downRightx2Tile)){ //down right capture condition
 				result.add(downRightx2Tile);
 			}
 		}
@@ -371,6 +376,9 @@ public class EnglishDraughts extends Game {
 		if(isKing && !hasBeenCaptured){
 			nbKingMovesWithoutCapture++;
 		}
+		else { //reset counter
+			nbKingMovesWithoutCapture = 0;
+		}
 
 	}
 
@@ -423,7 +431,7 @@ public class EnglishDraughts extends Game {
  * @author vdrevell
  *
  */
-class DraughtsMove extends ArrayList<Integer> implements Game.Move {
+public class DraughtsMove extends ArrayList<Integer> implements Game.Move {
 
 	private static final long serialVersionUID = -8215846964873293714L;
 

@@ -36,6 +36,37 @@ public class CheckerBoard {
 	
 	/** The ID of a white checker that is also a king. */
 	public static final byte WHITE_KING = 4 * 1 + 2 * 0 + 1 * 1;
+
+
+	/**
+	 * Return the type of pawn
+	 * @param pawnPosition, the position of the pawn
+	 * @return the pawn type in byte
+	 */
+	public byte getCheckerType(int pawnPosition){
+		boolean isEmpty = isEmpty(pawnPosition);
+		if(isEmpty){
+			return EMPTY;
+		}
+
+		boolean isKing = isKing(pawnPosition);
+		boolean isWhite = isWhite(pawnPosition);
+
+		if(isKing){
+			if(isWhite){
+					return WHITE_KING;
+				}
+				return BLACK_KING;
+			}
+
+		if(isWhite){
+			return WHITE_CHECKER;
+		}
+		return BLACK_CHECKER;
+
+
+
+	}
 	
 	/** 
 	 *  Default constructor, create a 64-tile (8x8) checker board.
@@ -208,7 +239,7 @@ public class CheckerBoard {
 	 * @param square Tile number
 	 * @param value ID of the pawn type (e.g {@link CheckerBoard#BLACK_CHECKER}, {@link CheckerBoard#BLACK_KING}... or {@link CheckerBoard#EMPTY})
 	 */
-	 void set(int square, byte value) {
+    public void set(int square, byte value) {
 		state[square-1] = value;
 	}
 	
