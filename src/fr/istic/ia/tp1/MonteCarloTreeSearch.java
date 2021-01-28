@@ -51,10 +51,7 @@ public class MonteCarloTreeSearch {
 		 * @return UCT value for the node
 		 */
 		double uct() {
-			//
-			// TODO implement the UCT function (Upper Confidence Bound for Trees)
-			//
-			return 0.0;
+			return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formala, see with the teacher for the constan
 		}
 		
 		/**
@@ -62,7 +59,7 @@ public class MonteCarloTreeSearch {
 		 * @return Estimated probability of win for the node
 		 */
 		double score() {
-			return (1 - this.w/this.n);	//the winning probability when we move to this node is 1 - win/loss (because the stats are for the other player)
+			return (this.w/this.n);	//the winning probability win/loss
 		}
 		
 		/**
@@ -152,19 +149,18 @@ public class MonteCarloTreeSearch {
 
 			try {
 				switch (winner) {
-				case (PlayerId.ONE):
+				case PlayerId.ONE:
 					win1++;
 					break;
-				case (PlayerId.TWO):
+				case PlayerId.TWO:
 					win2++;
 					break;
-				case (PlayerId.NONE):
+				case PlayerId.NONE:
 					win1 += 0.5;
 					win2 += 0.5;
 					break;
 				default:
 					throw new Exception("RolloutResults.update : PlayerId not supported");
-
 				}
 			}
 			catch (Exception e){
@@ -247,11 +243,6 @@ public class MonteCarloTreeSearch {
 		parent.children.add(child);					//adds the new child to the parent's children
 
 		return child;
-	}
-
-	private Move getRandomElement(List<Move> list){
-		Random r = new Random();
-		return list.get(r.nextInt(list.size()));
 	}
 
 	private static Move getRandomElement(List<Move> list){
