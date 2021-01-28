@@ -3,6 +3,7 @@ package fr.istic.ia.tp1;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import fr.istic.ia.tp1.Game.Move;
@@ -135,9 +136,29 @@ public class MonteCarloTreeSearch {
 		 * @param winner
 		 */
 		public void update(PlayerId winner) {
-			//
-			// TODO implement the update of RolloutResults
-			//
+			n++;
+
+			try {
+				switch (winner) {
+				case (PlayerId.ONE):
+					win1++;
+					break;
+				case (PlayerId.TWO):
+					win2++;
+					break;
+				case (PlayerId.NONE):
+					win1 += 0.5;
+					win2 += 0.5;
+					break;
+				default:
+					throw new Exception("RolloutResults.update : PlayerId not supported");
+
+				}
+			}
+			catch (Exception e){
+				e.printStackTrace();
+			}
+
 		}
 		
 		/**
@@ -188,15 +209,23 @@ public class MonteCarloTreeSearch {
 	 * @return The PlayerId of the winner (or NONE if equality or timeout).
 	 */
 	static PlayerId playRandomlyToEnd(Game game) {
-		//
-		// TODO implement playRandomlyToEnd
-		//
-		return null;
+		while(game.winner() == null){
+			List<Move> moveList = game.possibleMoves();
+			Move move = getRandomElement(moveList);
+			game.play(move);
+		}
+
+		return game.winner();
 	}
 
 	public EvalNode expand(EvalNode parent){
 		//TODO
 		return null;
+	}
+
+	private static Move getRandomElement(List<Move> list){
+		Random r = new Random();
+		return list.get(r.nextInt(list.size()));
 	}
 	
 	/**
@@ -206,10 +235,16 @@ public class MonteCarloTreeSearch {
 	 * @return A RolloutResults object containing the number of wins for each player and the number of simulations
 	 */
 	static RolloutResults rollOut(final Game game, int nbRuns) {
-		//
-		// TODO implement rollOut
-		//
-		return null;
+
+		RolloutResults rolloutResults = new RolloutResults();
+
+		for(int i =0; i< nbRuns;i++){
+			Game clone = game.clone();
+			PlayerId playerId = playRandomlyToEnd(clone);
+			rolloutResults.update(playerId);
+		}
+
+		return rolloutResults;
 	}
 	
 	/**
