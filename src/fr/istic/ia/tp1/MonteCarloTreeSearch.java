@@ -62,10 +62,7 @@ public class MonteCarloTreeSearch {
 		 * @return Estimated probability of win for the node
 		 */
 		double score() {
-			//
-			// TODO implement the score function for a node
-			//
-			return 0.0;
+			return (1 - this.w/this.n);	//the winning probability when we move to this node is 1 - win/loss (because the stats are for the other player)
 		}
 		
 		/**
