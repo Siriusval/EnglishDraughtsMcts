@@ -83,9 +83,24 @@ public class MonteCarloTreeSearch {
 		}
 	}
 
+	/**
+	 * Go through the children of the chosen node to computes their uct in order to choose the next node
+	 * @param children list of the nodes to evaluate
+	 * @return the node with the best UCT value
+	 */
 	private EvalNode nodeChoice(ArrayList<EvalNode> children){
-			//TODO
-		return null;
+		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
+		EvalNode bestNode = null;
+
+		for(EvalNode child : children){
+			double childUCT = child.uct();
+			if(childUCT>bestUCT){ //if the node's uct is better, if equal we prioritize the left of the tree
+				bestUCT=childUCT;	//update bestUCT
+				bestNode = child;	//update bestnode
+			}
+		}
+
+		return bestNode;
 	}
 
 	/**
