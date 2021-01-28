@@ -3,6 +3,7 @@ package fr.istic.ia.tp1;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import fr.istic.ia.tp1.Game.Move;
@@ -194,9 +195,28 @@ public class MonteCarloTreeSearch {
 		return null;
 	}
 
+	/**
+	 * Expand step of the MCTS, creates a child and add it to the parent's children
+	 * @param parent Node to expand
+	 * @return The children node
+	 */
 	public EvalNode expand(EvalNode parent){
-		//TODO
-		return null;
+
+		List<Move> pool =parent.game.possibleMoves();	//takes the parent's state possible moves
+		Move toPlay = getRandomElement(pool);			//choose randomly a move
+
+		Game etatEnfant = parent.game.clone();  //gets the parent's game
+		etatEnfant.play(toPlay);				//and play the chosen move on it
+
+		EvalNode child = new EvalNode(etatEnfant);	//creates a new Node with the child's state
+		parent.children.add(child);					//adds the new child to the parent's children
+
+		return child;
+	}
+
+	private Move getRandomElement(List<Move> list){
+		Random r = new Random();
+		return list.get(r.nextInt(list.size()));
 	}
 	
 	/**
@@ -242,11 +262,7 @@ public class MonteCarloTreeSearch {
 	 * @return <code>true</code> if there is no need for further exploration (to speed up end of games).
 	 */
 	public boolean evaluateTreeOnce() {
-		//
-		// TODO implement MCTS evaluateTreeOnce
-		// TODO: Ask qs to teacher for return and rollout 1
-		//
-		
+
 		// List of visited nodes
 		List<EvalNode> visitedNodes = new ArrayList<>();
 		
