@@ -149,19 +149,19 @@ public class MonteCarloTreeSearch {
 
 			try {
 				switch (winner) {
-				case PlayerId.ONE:
-					win1++;
-					break;
-				case PlayerId.TWO:
-					win2++;
-					break;
-				case PlayerId.NONE:
-					win1 += 0.5;
-					win2 += 0.5;
-					break;
-				default:
-					throw new Exception("RolloutResults.update : PlayerId not supported");
-				}
+					case ONE:
+						win1++;
+						break;
+					case TWO:
+						win2++;
+						break;
+					case NONE:
+						win1 += 0.5;
+						win2 += 0.5;
+						break;
+					default:
+						throw new Exception("RolloutResults.update : PlayerId not supported");
+					}
 			}
 			catch (Exception e){
 				e.printStackTrace();
