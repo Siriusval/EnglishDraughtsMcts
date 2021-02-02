@@ -67,9 +67,9 @@ public class MonteCarloTreeSearch {
 		 * @param res
 		 */
 		void updateStats(RolloutResults res) {
-			//
-			// TODO implement updateStats for a node
-			//
+
+			this.w = res.nbWins(game.player());
+			this.n = res.n;
 		}
 
 		boolean isLeaf(){
@@ -83,13 +83,14 @@ public class MonteCarloTreeSearch {
 	 * @return the node with the best UCT value
 	 */
 	private EvalNode nodeChoice(ArrayList<EvalNode> children){
+
 		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
 		for(EvalNode child : children){
 			double childUCT = child.uct();
 			if(childUCT>bestUCT){ //if the node's uct is better, if equal we prioritize the left of the tree
-				bestUCT=childUCT;	//update bestUCT
+				bestUCT = childUCT;	//update bestUCT
 				bestNode = child;	//update bestnode
 			}
 		}
@@ -334,10 +335,22 @@ public class MonteCarloTreeSearch {
 	 * @return The best move to play from the current MCTS tree state.
 	 */
 	public Move getBestMove() {
-		// 
-		// TODO Implement MCTS getBestMove
-		//
-		return null;
+
+		ArrayList<EvalNode> children = this.root.children;
+		double bestScore = 0.0;
+		Move bestMove = null;
+
+		//Get node with best score
+		for(EvalNode child : children){
+			double childScore = child.score();
+			if(childScore> bestScore){
+				bestScore = childScore;
+
+				EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
+				bestMove = englishDraughts.getLastMove();
+			}
+		}
+		return bestMove;
 	}
 	
 	

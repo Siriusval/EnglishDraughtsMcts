@@ -51,6 +51,12 @@ public class EnglishDraughts extends Game {
 	}
 
 	/**
+	 * Store the last move<br>
+	 *     Useful to retrieve bestMove from children nodes in MCTS
+	 */
+	private Move lastMove;
+
+	/**
 	 * Copy constructor
 	 * @param d The game to copy
 	 */
@@ -148,7 +154,6 @@ public class EnglishDraughts extends Game {
 	@Override
 	public List<Move> possibleMoves() {
 		//
-		// TODO generate the list of possible moves
 		// Advice:
 		// create two auxiliary functions :
 		// - one for jump moves from a given position, with capture (and multi-capture).
@@ -171,7 +176,6 @@ public class EnglishDraughts extends Game {
 		return result;
 	}
 
-	//TODO : add checker type and liste of captured checker as parameter
 	/**
 	 * Computes all the possible catch moves, simple and multiple ones
 	 * @param pos position of current pawn
@@ -381,6 +385,8 @@ public class EnglishDraughts extends Game {
 			}
 		}
 
+		//update last move
+		lastMove = aMove;
 
 		// Promote to king if the pawn ends on the opposite of the board
 		int currentTile = move.getEndPosition();
@@ -496,5 +502,14 @@ public class DraughtsMove extends ArrayList<Integer> implements Game.Move {
 	public int getEndPosition(){
 		return this.get(this.size()-1);
 	}
+
 }
+
+	/**
+	 * Get the last move played in the game
+	 * @return the last move played
+	 */
+	public Move getLastMove() {
+		return lastMove;
+	}
 }
