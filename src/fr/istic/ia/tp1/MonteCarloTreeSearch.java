@@ -68,8 +68,8 @@ public class MonteCarloTreeSearch {
 		 */
 		void updateStats(RolloutResults res) {
 
-			this.w = res.nbWins(game.player());
-			this.n = res.n;
+			this.w += res.nbWins(game.player());
+			this.n += res.n;
 		}
 
 		boolean isLeaf(){
@@ -84,7 +84,7 @@ public class MonteCarloTreeSearch {
 	 */
 	private EvalNode nodeChoice(ArrayList<EvalNode> children){
 
-		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
+		double bestUCT = -1; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
 		for(EvalNode child : children){
@@ -315,16 +315,28 @@ public class MonteCarloTreeSearch {
 			visitedNodes.add(node);
 		}
 
-		// Expand node : create a random new child
-		EvalNode newChild = expand(node);
-		visitedNodes.add(newChild);
+		//If the leaf isn't a win
+		if(node.game.winner()==null) {
+			// Expand node : create a random new child
+			EvalNode newChild = expand(node);
+			visitedNodes.add(newChild);
 
-		// Simulate from new node(s)
-		RolloutResults valeur =  rollOut(newChild.game,1); //1 ?
+			// Simulate from new node(s)
+			RolloutResults valeur = rollOut(newChild.game, 1); //1 ?
 
-		// Backpropagate results
-		for(EvalNode vNode : visitedNodes){
-			vNode.updateStats(valeur);
+			// Backpropagate results
+			for (EvalNode vNode : visitedNodes) {
+				vNode.updateStats(valeur);
+			}
+
+			//Display the winrate in the actual game state
+			System.out.println("Root winrate: "+root.score());
+			int compteur=0;
+			//Display the winrate for all explored children
+			for(EvalNode child : root.children){
+				System.out.println("Enfant "+compteur+" winrate: "+child.score());
+			}
+
 		}
 		// Return false if tree evaluation should continue
 		return false;
@@ -337,7 +349,7 @@ public class MonteCarloTreeSearch {
 	public Move getBestMove() {
 
 		ArrayList<EvalNode> children = this.root.children;
-		double bestScore = 0.0;
+		double bestScore = -1;
 		Move bestMove = null;
 
 		//Get node with best score
