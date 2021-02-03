@@ -55,7 +55,7 @@ public class MonteCarloTreeSearch {
 				return this.score() + Math.sqrt(2 * Math.log(root.n)/1); // if it's the first exploration of this node
 			}
 			else {
-				return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formula
+				return (1-this.score()) + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formula
 			}
 		}
 		
