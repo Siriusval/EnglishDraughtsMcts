@@ -55,7 +55,7 @@ public class MonteCarloTreeSearch {
 				return this.score() + Math.sqrt(2 * Math.log(root.n)/1); // if it's the first exploration of this node
 			}
 			else {
-				return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formala
+				return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formula
 			}
 		}
 		
@@ -78,7 +78,7 @@ public class MonteCarloTreeSearch {
 		 */
 		void updateStats(RolloutResults res) {
 
-			this.w += res.nbWins(game.player());
+			this.w += res.nbWins(this.game.player());
 			this.n += res.n;
 		}
 
@@ -94,7 +94,7 @@ public class MonteCarloTreeSearch {
 	 */
 	private Optional<EvalNode> nodeChoice(EvalNode parent){
 
-		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
+		double bestUCT = -1; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
 		//Computes the best UCT for the existing children
@@ -323,6 +323,13 @@ public class MonteCarloTreeSearch {
 		System.out.println("Stopped search after " 
 		       + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + " ms. "
 		       + "Root stats is " + root.w + "/" + root.n + String.format(" (%.2f%% loss)", 100.0*root.w/root.n));
+		int compteur = 0;
+		for(EvalNode child : root.children){
+			EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
+			System.out.println("Enfant "+compteur+" winrate: "+child.score() + " Move en question: "+ englishDraughts.getLastMove());
+			compteur++;
+		}
+		System.out.println(this.getBestMove());
 	}
 	
 	/**
@@ -340,7 +347,6 @@ public class MonteCarloTreeSearch {
 		
 		// Selection (with UCT tree policy)
 		while(!node.isLeaf()){
-
 			//tree policy to choose a child
 			Optional<EvalNode> newNode = nodeChoice(node);
 
@@ -349,7 +355,9 @@ public class MonteCarloTreeSearch {
 				node= newNode.get();
 				visitedNodes.add(node);
 			}
-
+			else{
+				break;
+			}
 		}
 
 		//If the leaf isn't a win
@@ -365,15 +373,6 @@ public class MonteCarloTreeSearch {
 			for (EvalNode vNode : visitedNodes) {
 				vNode.updateStats(valeur);
 			}
-
-			//Display the winrate in the actual game state
-			System.out.println("Root winrate: "+root.score());
-			int compteur=0;
-			//Display the winrate for all explored children
-			for(EvalNode child : root.children){
-				System.out.println("Enfant "+compteur+" winrate: "+child.score());
-			}
-
 		}
 		// Return false if tree evaluation should continue
 		return false;
@@ -386,15 +385,14 @@ public class MonteCarloTreeSearch {
 	public Move getBestMove() {
 
 		ArrayList<EvalNode> children = this.root.children;
-		double bestScore = 0.0;
+		double bestScore = Double.MAX_VALUE;
 		Move bestMove = null;
 
 		//Get node with best score
 		for(EvalNode child : children){
 			double childScore = child.score();
-			if(childScore> bestScore){
+			if(childScore < bestScore){
 				bestScore = childScore;
-
 				EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
 				bestMove = englishDraughts.getLastMove();
 			}
