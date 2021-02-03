@@ -1,9 +1,6 @@
 package fr.istic.ia.tp1;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import fr.istic.ia.tp1.Game.Move;
@@ -91,18 +88,17 @@ public class MonteCarloTreeSearch {
 	}
 
 	/**
-	 * Go through the children of the chosen node to computes their uct in order to choose the next node
-	 * @param children list of the nodes to evaluate
+	 * Go through the children of the chosen node to computes their uct, compare it to a new child uct if a new move exists in order to choose the next node
+	 * @param parent current game state
 	 * @return the node with the best UCT value
 	 */
-	private EvalNode nodeChoice(ArrayList<EvalNode> children){
+	private Optional<EvalNode> nodeChoice(EvalNode parent){
 
 		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
-
-
-		for(EvalNode child : children){
+		//Computes the best UCT for the existing children
+		for(EvalNode child : parent.children){
 			double childUCT = child.uct();
 			if(childUCT>bestUCT){ //if the node's uct is better, if equal we prioritize the left of the tree
 				bestUCT = childUCT;	//update bestUCT
@@ -110,7 +106,15 @@ public class MonteCarloTreeSearch {
 			}
 		}
 
-		return bestNode;
+		//if there is an unexplored children
+		if(parent.children.size()!=parent.game.possibleMoves().size()){
+			EvalNode emptyNode = new EvalNode(root.game); //creates an empty node in order uct function
+			if(emptyNode.uct()>bestUCT){ //if that's more interresting to explore a new child
+				return Optional.empty(); //returns empty to stay on current node
+			}
+		}
+
+		return Optional.of(bestNode); //returns the node
 	}
 
 	/**
@@ -251,6 +255,17 @@ public class MonteCarloTreeSearch {
 	public EvalNode expand(EvalNode parent){
 
 		List<Move> pool =parent.game.possibleMoves();	//takes the parent's state possible moves
+
+		//creates list of already calculated moves
+		List<Move> existingMove = new ArrayList<>();
+		for(EvalNode child : parent.children){
+			EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
+			existingMove.add(englishDraughts.getLastMove());
+		}
+
+		//to have only non existing moves in the pool
+		pool.removeAll(existingMove);
+
 		Move toPlay = getRandomElement(pool);
 		Game etatEnfant = parent.game.clone();  //gets the parent's game
 		etatEnfant.play(toPlay);				//and play the chosen move on it
@@ -325,11 +340,13 @@ public class MonteCarloTreeSearch {
 		
 		// Selection (with UCT tree policy)
 		while(!node.isLeaf()){
+
 			//tree policy to choose a child
-			EvalNode newNode = nodeChoice(node.children);
+			Optional<EvalNode> newNode = nodeChoice(node);
+
 			//if we nodeChoice chooses a child, else we go explore another branch
-			if(newNode!=null){
-				node=newNode;
+			if(!newNode.isEmpty()){
+				node= newNode.get();
 				visitedNodes.add(node);
 			}
 
