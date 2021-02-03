@@ -100,6 +100,8 @@ public class MonteCarloTreeSearch {
 		double bestUCT = 0.0; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
+
+
 		for(EvalNode child : children){
 			double childUCT = child.uct();
 			if(childUCT>bestUCT){ //if the node's uct is better, if equal we prioritize the left of the tree
@@ -240,14 +242,6 @@ public class MonteCarloTreeSearch {
 		return game.winner();
 	}
 
-	/**
-	 * Explores an unknown children in the tree
-	 * @param parent node on which we need to do the exploration
-	 * @return the new node
-	 */
-	public EvalNode exploration(EvalNode parent){
-		//TODO : chooses a non  existant children and add it to the tree
-	}
 
 	/**
 	 * Expand step of the MCTS, creates a child and add it to the parent's children
