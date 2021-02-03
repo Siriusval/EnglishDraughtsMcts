@@ -51,7 +51,15 @@ public class MonteCarloTreeSearch {
 		 * @return UCT value for the node
 		 */
 		double uct() {
-			return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formala, see with the teacher for the constan
+			if(root.n==0){
+				return this.score() + Math.sqrt(2 * Math.log(1)/1); //if it's the first exploration in the tree
+			}
+			else if(this.n==0){
+				return this.score() + Math.sqrt(2 * Math.log(root.n)/1); // if it's the first exploration of this node
+			}
+			else {
+				return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formala
+			}
 		}
 		
 		/**
@@ -59,7 +67,12 @@ public class MonteCarloTreeSearch {
 		 * @return Estimated probability of win for the node
 		 */
 		double score() {
-			return (this.w/this.n);	//the winning probability win/loss
+			if(this.n==0){
+				return 0; //0 to avoid dividing by 0
+			}
+			else{
+				return this.w/this.n; //the winning probability win/loss
+			}
 		}
 		
 		/**
@@ -228,6 +241,15 @@ public class MonteCarloTreeSearch {
 	}
 
 	/**
+	 * Explores an unknown children in the tree
+	 * @param parent node on which we need to do the exploration
+	 * @return the new node
+	 */
+	public EvalNode exploration(EvalNode parent){
+		//TODO : chooses a non  existant children and add it to the tree
+	}
+
+	/**
 	 * Expand step of the MCTS, creates a child and add it to the parent's children
 	 * @param parent Node to expand
 	 * @return The children node
@@ -235,8 +257,7 @@ public class MonteCarloTreeSearch {
 	public EvalNode expand(EvalNode parent){
 
 		List<Move> pool =parent.game.possibleMoves();	//takes the parent's state possible moves
-		Move toPlay = getRandomElement(pool);			//choose randomly a move
-
+		Move toPlay = getRandomElement(pool);
 		Game etatEnfant = parent.game.clone();  //gets the parent's game
 		etatEnfant.play(toPlay);				//and play the chosen move on it
 
@@ -311,8 +332,13 @@ public class MonteCarloTreeSearch {
 		// Selection (with UCT tree policy)
 		while(!node.isLeaf()){
 			//tree policy to choose a child
-			node = nodeChoice(node.children);
-			visitedNodes.add(node);
+			EvalNode newNode = nodeChoice(node.children);
+			//if we nodeChoice chooses a child, else we go explore another branch
+			if(newNode!=null){
+				node=newNode;
+				visitedNodes.add(node);
+			}
+
 		}
 
 		//If the leaf isn't a win
