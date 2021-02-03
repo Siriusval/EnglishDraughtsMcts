@@ -40,6 +40,7 @@ public class PlayerHuman implements Player {
 			try {
 				System.in.read();
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 			return null;
 		}

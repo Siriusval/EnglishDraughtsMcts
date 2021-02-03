@@ -1,6 +1,3 @@
-/**
- * 
- */
 package fr.istic.ia.tp1;
 
 import java.util.ArrayList;
@@ -14,7 +11,7 @@ import java.util.function.Predicate;
  */
 public class CheckerBoard {
 	final byte size;
-	private byte[] state;
+	private final byte[] state;
 
 	// 0	 	- 0		- 0
 	// Occupé	- Noir	- King
@@ -94,7 +91,7 @@ public class CheckerBoard {
 	
 	/**
 	 * Copy constructor
-	 * @param board
+	 * @param board, the checkerboard to copy
 	 */
 	protected CheckerBoard(CheckerBoard board) {
 		this.size = board.size;
@@ -117,7 +114,7 @@ public class CheckerBoard {
 	
 	/**
 	 * Check if the board is empty
-	 * @return
+	 * @return true if empty, else false
 	 */
 	public boolean isEmpty() {
 		for (int i=1; i<=nbPlayableTiles(); ++i)
@@ -129,7 +126,7 @@ public class CheckerBoard {
 	
 	/**
 	 * Auxiliary function for toString
-	 * @param sb
+	 * @param sb StringBuffer object
 	 * @param colorTest
 	 */
 	private void buildPawnsList(StringBuffer sb, Predicate<Integer> colorTest) {
@@ -160,7 +157,7 @@ public class CheckerBoard {
 	
 	/**
 	 * Get a string representation for drawing a tile containing a given pawnID
-	 * @param pawnID
+	 * @param pawnID, the id of the pawn
 	 * @return A string representing the given pawnID
 	 */
 	String pawnRepresentation(byte pawnID) {
@@ -226,7 +223,7 @@ public class CheckerBoard {
 	public String boardView() {
 		String str = "";
 		for (int y=size; y>=-1; --y) {
-			str += boardLineFormatString(y, (Integer i) -> String.format("%2d", i)) 
+			str += boardLineFormatString(y, (Integer i) -> String.format("%2d", i))
 				+ "   "
 				+ boardLineFormatString(y, (Integer i) -> pawnRepresentation(get(i)))
 				+ "\n";
@@ -263,7 +260,7 @@ public class CheckerBoard {
 	
 	/**
 	 * Check if the square is in the top row (black side)
-	 * @param square
+	 * @param square, the id of the square
 	 * @return
 	 */
 	public boolean inTopRow(int square) {
@@ -435,7 +432,7 @@ public class CheckerBoard {
 	 * @return The list of white pawns
 	 */
 	public ArrayList<Integer> getWhitePawns() {
-		ArrayList<Integer> myPawns = new ArrayList<Integer>();
+		ArrayList<Integer> myPawns = new ArrayList<>();
 		myPawns.ensureCapacity((size/2 - 1) * (size/2));
 		for (int pawn = 1; pawn <= nbPlayableTiles(); ++pawn) {
 			if ( isWhite(pawn) ) {
@@ -450,7 +447,7 @@ public class CheckerBoard {
 	 * @return The list of black pawns
 	 */
 	public ArrayList<Integer> getBlackPawns() {
-		ArrayList<Integer> myPawns = new ArrayList<Integer>();
+		ArrayList<Integer> myPawns = new ArrayList<>();
 		myPawns.ensureCapacity((size/2 - 1) * (size/2));
 		for (int pawn = 1; pawn <= nbPlayableTiles(); ++pawn) {
 			if ( isBlack(pawn) ) {

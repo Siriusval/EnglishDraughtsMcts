@@ -7,7 +7,7 @@ package fr.istic.ia.tp1;
  */
 public class PlayerMCTS implements Player {
 	
-	private int timeAllowedMillis;
+	private final int timeAllowedMillis;
 	
 	/**
 	 * Default constructor, sets a computation timeout of 1000 ms.

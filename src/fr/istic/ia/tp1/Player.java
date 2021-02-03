@@ -12,5 +12,5 @@ public interface Player {
 	 * @param game The game state from which to play
 	 * @return The move ({@link Game.Move}) chosen by the user or the algorithm
 	 */
-	public Game.Move play(Game game);
+	Game.Move play(Game game);
 }

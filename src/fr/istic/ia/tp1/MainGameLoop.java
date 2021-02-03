@@ -12,7 +12,7 @@ import fr.istic.ia.tp1.Game.PlayerId;
  * Can be used to play any game with the {@link Game} interface, with players classes 
  * implementing the {@link Player} interface.
  * 
- * The class provides menu building facilities to instanciate the game and players.
+ * The class provides menu building facilities to instantiate the game and players.
  * 
  * @author vdrevell
  *
@@ -33,14 +33,16 @@ public class MainGameLoop {
 			this.supplier = generator;
 		}
 		@Override
-		public String toString() { return name; };
+		public String toString() {
+			return name;
+		}
 		@Override
 		public T get() { return supplier.get(); }
 	}
 	
 	/**
 	 * Display a menu and let the user chose an item from a list.
-	 * @param list
+	 * @param list _
 	 * @return The list element chosen by the user
 	 */
 	static <T> T chooseInList(ArrayList<T> list) {
@@ -80,14 +82,14 @@ public class MainGameLoop {
 	 * @return A new {@link Player} instance
 	 */
 	static Player chooseAndCreatePlayer(String name) {
-		ArrayList<NamedSupplier<Player>> list = new ArrayList<NamedSupplier<Player>>();
-		list.add( new NamedSupplier<Player>("Human",     () -> new PlayerHuman(false)) );
-		list.add( new NamedSupplier<Player>("Human (with list)", () -> new PlayerHuman(true)) );
-		list.add( new NamedSupplier<Player>("Random",    () -> new PlayerRandom())     );
-		list.add( new NamedSupplier<Player>("MCTS 1 s",  () -> new PlayerMCTS(1000))   );
-		list.add( new NamedSupplier<Player>("MCTS 2 s",  () -> new PlayerMCTS(2000))   );
-		list.add( new NamedSupplier<Player>("MCTS 5 s",  () -> new PlayerMCTS(5000))   );
-		list.add( new NamedSupplier<Player>("MCTS 10 s", () -> new PlayerMCTS(10000))  );
+		ArrayList<NamedSupplier<Player>> list = new ArrayList<>();
+		list.add(new NamedSupplier<>("Human", () -> new PlayerHuman(false)) );
+		list.add(new NamedSupplier<>("Human (with list)", () -> new PlayerHuman(true)) );
+		list.add(new NamedSupplier<>("Random", PlayerRandom::new)     );
+		list.add(new NamedSupplier<>("MCTS 1 s", () -> new PlayerMCTS(1000))   );
+		list.add(new NamedSupplier<>("MCTS 2 s", () -> new PlayerMCTS(2000))   );
+		list.add(new NamedSupplier<>("MCTS 5 s", () -> new PlayerMCTS(5000))   );
+		list.add(new NamedSupplier<>("MCTS 10 s", () -> new PlayerMCTS(10000))  );
 		
 		System.out.println("Select player type for " + name + ":");
 		return chooseInList(list).get();
@@ -98,10 +100,10 @@ public class MainGameLoop {
 	 * @return A new {@link Game} instance
 	 */
 	static Game chooseAndCreateGame() {
-		ArrayList<NamedSupplier<Game>> list = new ArrayList<NamedSupplier<Game>>();
-		list.add( new NamedSupplier<Game>("English Draughts (8x8)",    () -> new EnglishDraughts())   );
-		list.add( new NamedSupplier<Game>("English Draughts on 10x10", () -> new EnglishDraughts(10)) );
-		list.add( new NamedSupplier<Game>("English Draughts on 6x6",   () -> new EnglishDraughts(6))  );
+		ArrayList<NamedSupplier<Game>> list = new ArrayList<>();
+		list.add(new NamedSupplier<>("English Draughts (8x8)", EnglishDraughts::new)   );
+		list.add(new NamedSupplier<>("English Draughts on 10x10", () -> new EnglishDraughts(10)) );
+		list.add(new NamedSupplier<>("English Draughts on 6x6", () -> new EnglishDraughts(6))  );
 		
 		System.out.println("Select the game to play:");
 		return chooseInList(list).get();
@@ -110,10 +112,10 @@ public class MainGameLoop {
 	/**
 	 * Two-player gameplay program entry point (main)
 	 *
-	 * - The program first instanciates a Game from user input, and then two Players based on user choice.
+	 * - The program first instantiates a Game from user input, and then two Players based on user choice.
 	 * - Then the game loop starts, letting both players play until the end of the game
 	 * - The winner (or equality) is finally displayed before the program quits.
-	 * @param args
+	 * @param args _
 	 */
 	public static void main(String[] args) {
 		System.out.println("English Draughts - M1 IL ISTIC - TP IA");
@@ -138,8 +140,6 @@ public class MainGameLoop {
 			case TWO:
 				move = player2.play(game);
 				break;
-			default:
-				move = null;
 			}
 			
 			// Exit if something went wrong

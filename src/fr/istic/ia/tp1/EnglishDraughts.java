@@ -1,6 +1,5 @@
 package fr.istic.ia.tp1;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -65,6 +64,7 @@ public class EnglishDraughts extends Game {
 		this.playerId = d.playerId;
 		this.nbTurn = d.nbTurn;
 		this.nbKingMovesWithoutCapture = d.nbKingMovesWithoutCapture;
+		this.lastMove = d.lastMove;
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class EnglishDraughts extends Game {
 	/**
 	 * Check if a tile is empty
 	 * @param square Tile number
-	 * @return
+	 * @return true if there's no pawn on a tile, else false
 	 */
 	boolean isEmpty(int square) {
 		return this.board.isEmpty(square);
@@ -113,7 +113,7 @@ public class EnglishDraughts extends Game {
 	/**
 	 * Check if a tile is owned by adversary
 	 * @param square Tile number
-	 * @return
+	 * @return true if the tile is owned by adversary, else false
 	 */
 	boolean isAdversary(int square) {
 		return !this.isEmpty(square) && !this.isMine(square);
@@ -122,7 +122,7 @@ public class EnglishDraughts extends Game {
 	/**
 	 * Check if a tile is owned by the current player
 	 * @param square Tile number
-	 * @return
+	 * @return true if there's a pawn of the current player on this tile, else false
 	 */
 	boolean isMine(int square) {
 		if(this.playerId.equals(PlayerId.ONE)){
@@ -164,7 +164,7 @@ public class EnglishDraughts extends Game {
 
 		for(int pawn : myPawns()){	//pour chaque pion du joueur actuel
 
-			result.addAll(possibleCatchMoves(pawn, board.getCheckerType(pawn),new HashSet<Integer>()));
+			result.addAll(possibleCatchMoves(pawn, board.getCheckerType(pawn),new HashSet<>()));
 		}
 
 		if(result.isEmpty()){ //si aucune capture possible
@@ -180,24 +180,24 @@ public class EnglishDraughts extends Game {
 	 * Computes all the possible catch moves, simple and multiple ones
 	 * @param pos position of current pawn
 	 * @param checkerType , if the checker is white, black, king...
-	 * @param catchedChecker , list of checker already taken
+	 * @param caughtChecker , list of checker already taken
 	 * @return list of possible capture moves
 	 */
-	private List<Move> possibleCatchMoves(int pos, byte checkerType, Set<Integer> catchedChecker){
+	private List<Move> possibleCatchMoves(int pos, byte checkerType, Set<Integer> caughtChecker){
 		List<Move> result = new ArrayList<>();
-		List<Integer> destJump = destJumpList(pos,checkerType,catchedChecker); //list of capture directions
+		List<Integer> destJump = destJumpList(pos,checkerType,caughtChecker); //list of capture directions
 
 		//Remove already explored solutions
-		destJump.removeAll(catchedChecker);
+		destJump.removeAll(caughtChecker);
 
 		for(int dest : destJump){ //pour toutes les captures possibles
 
-			//Copy arrayList to propagate list of catched checkers, different for each move
-			Set<Integer> catchedCheckerPropagate =  new HashSet<>(catchedChecker);
-			catchedCheckerPropagate.add(dest);
+			//Copy arrayList to propagate list of caughtChecker checkers, different for each move
+			Set<Integer> caughtCheckerPropagate =  new HashSet<>(caughtChecker);
+			caughtCheckerPropagate.add(dest);
 
 			//get to know if it can be a multiple move
-			List<Move> movesPrisesDest = possibleCatchMoves(dest, checkerType,catchedCheckerPropagate);
+			List<Move> movesPrisesDest = possibleCatchMoves(dest, checkerType,caughtCheckerPropagate);
 
 			if (movesPrisesDest.isEmpty()){ //si mono capture
 				result.add(createAMove(pos,dest)); //add move to list
@@ -218,10 +218,10 @@ public class EnglishDraughts extends Game {
 	 * Helper for possibleCatchMoves
 	 * @param start actual pawn square
 	 * @param checkerType , if the checker is white, black, king...
-	 * @param catchedChecker , list of checker already taken
+	 * @param caughtChecker , list of checker already taken
 	 * @return list of all capture positions
 	 */
-	private List<Integer> destJumpList(int start, byte checkerType, Set<Integer> catchedChecker){
+	private List<Integer> destJumpList(int start, byte checkerType, Set<Integer> caughtChecker){
 		List<Integer> result = new ArrayList<>();
 
 		//if it's white's turn or a king
@@ -232,8 +232,8 @@ public class EnglishDraughts extends Game {
 			int upRightx2Tile = this.board.neighborUpRight(upRightTile);
 
 			//Check if a catch can be made
-			result.addAll(catchPosIfExist(catchedChecker, upLeftTile, upLeftx2Tile));
-			result.addAll(catchPosIfExist(catchedChecker, upRightTile, upRightx2Tile));
+			result.addAll(catchPosIfExist(caughtChecker, upLeftTile, upLeftx2Tile));
+			result.addAll(catchPosIfExist(caughtChecker, upRightTile, upRightx2Tile));
 		}
 
 //if it's black turn or a king
@@ -243,24 +243,24 @@ public class EnglishDraughts extends Game {
 			int downRightTile = this.board.neighborDownRight(start);
 			int downRightx2Tile = this.board.neighborDownRight(downRightTile);
 
-			result.addAll(catchPosIfExist(catchedChecker, downLeftTile, downLeftx2Tile));
-			result.addAll(catchPosIfExist(catchedChecker, downRightTile, downRightx2Tile));
+			result.addAll(catchPosIfExist(caughtChecker, downLeftTile, downLeftx2Tile));
+			result.addAll(catchPosIfExist(caughtChecker, downRightTile, downRightx2Tile));
 		}
 
 		return result;
 	}
 
 	/**
-	 * If the checker exit and can be catched, return it
-	 * @param catchedChecker, the list of already catched checker
+	 * If the checker exit and can be caught, return it
+	 * @param caughtChecker, the list of already caught checker
 	 * @param diagTile, the tile in diagonal, should be adversary
 	 * @param diagx2Tile, the tile after (still in diagonal), shoulb be empty
 	 * @return the list containing the move (so it can be added in destJumpList)
 	 */
-	private List<Integer> catchPosIfExist(Set<Integer> catchedChecker, int diagTile, int diagx2Tile) {
-		List result = new ArrayList();
-		//Check if tile has't been catched already in this move
-		if (!catchedChecker.contains(diagTile)) {
+	private List<Integer> catchPosIfExist(Set<Integer> caughtChecker, int diagTile, int diagx2Tile) {
+		ArrayList<Integer> result = new ArrayList<>();
+		//Check if tile has't been caught already in this move
+		if (!caughtChecker.contains(diagTile)) {
 			//Check if both tiles exist, and the first should be an adversary, the second should be empty
 			if (board.tileExist(diagTile) && this.isAdversary(diagTile) && board.tileExist(diagx2Tile) && this.isEmpty(diagx2Tile)) { //up left capture condition
 				result.add(diagx2Tile);
@@ -330,14 +330,12 @@ public class EnglishDraughts extends Game {
 	 * Create a move with multiple coordinates
 	 * @param start the start position
 	 * @param dests the destinations
-	 * @return
+	 * @return the move with all the coordinates
 	 */
 	private DraughtsMove createAMultipleMove(int start, DraughtsMove dests){
 		DraughtsMove result = new DraughtsMove();
 		result.add(start);
-		for(int dest : dests){
-			result.add(dest);
-		}
+		result.addAll(dests);
 		return result;
 	}
 
@@ -352,7 +350,7 @@ public class EnglishDraughts extends Game {
 	 * - Change playerId for next player
 	 * - Increment number of turn
 	 * - (optional) Increment nbKingMovesWithoutCapture if needed
-	 * @param aMove
+	 * @param aMove, the move to play
 	 */
 	@Override
 	public void play(Move aMove) {
@@ -458,7 +456,7 @@ public class EnglishDraughts extends Game {
 /**
  * Class representing a move in the English draughts game
  * A move is an ArrayList of Integers, corresponding to the successive tile numbers (Manouri notation)
- * toString is overrided to provide Manouri notation output.
+ * toString is overriden to provide Manouri notation output.
  * @author vdrevell
  *
  */

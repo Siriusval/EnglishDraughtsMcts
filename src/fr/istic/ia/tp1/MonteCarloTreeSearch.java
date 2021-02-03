@@ -1,9 +1,6 @@
 package fr.istic.ia.tp1;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import fr.istic.ia.tp1.Game.Move;
@@ -41,7 +38,7 @@ public class MonteCarloTreeSearch {
 		 */
 		EvalNode(Game game) {
 			this.game = game;
-			children = new ArrayList<EvalNode>();
+			children = new ArrayList<>();
 			w = 0.0;
 			n = 0;
 		}
@@ -51,7 +48,15 @@ public class MonteCarloTreeSearch {
 		 * @return UCT value for the node
 		 */
 		double uct() {
-			return this.score() + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formala, see with the teacher for the constan
+			if(root.n==0){
+				return this.score() + Math.sqrt(2 * Math.log(1)/1); //if it's the first exploration in the tree
+			}
+			else if(this.n==0){
+				return this.score() + Math.sqrt(2 * Math.log(root.n)/1); // if it's the first exploration of this node
+			}
+			else {
+				return (1-this.score()) + Math.sqrt(2 * Math.log(root.n) / this.n); //implementation of the uct formula
+			}
 		}
 		
 		/**
@@ -59,16 +64,21 @@ public class MonteCarloTreeSearch {
 		 * @return Estimated probability of win for the node
 		 */
 		double score() {
-			return (this.w/this.n);	//the winning probability win/loss
+			if(this.n==0){
+				return 0; //0 to avoid dividing by 0
+			}
+			else{
+				return this.w/this.n; //the winning probability win/loss
+			}
 		}
 		
 		/**
 		 * Update the stats (n and w) of the node with the provided rollout results
-		 * @param res
+		 * @param res, the RolloutResults to add to our current Results
 		 */
 		void updateStats(RolloutResults res) {
 
-			this.w += res.nbWins(game.player());
+			this.w += res.nbWins(this.game.player());
 			this.n += res.n;
 		}
 
@@ -78,16 +88,17 @@ public class MonteCarloTreeSearch {
 	}
 
 	/**
-	 * Go through the children of the chosen node to computes their uct in order to choose the next node
-	 * @param children list of the nodes to evaluate
+	 * Go through the children of the chosen node to computes their uct, compare it to a new child uct if a new move exists in order to choose the next node
+	 * @param parent current game state
 	 * @return the node with the best UCT value
 	 */
-	private EvalNode nodeChoice(ArrayList<EvalNode> children){
+	private Optional<EvalNode> nodeChoice(EvalNode parent){
 
 		double bestUCT = -1; //to store bestUCT in order to compute it only one time
 		EvalNode bestNode = null;
 
-		for(EvalNode child : children){
+		//Computes the best UCT for the existing children
+		for(EvalNode child : parent.children){
 			double childUCT = child.uct();
 			if(childUCT>bestUCT){ //if the node's uct is better, if equal we prioritize the left of the tree
 				bestUCT = childUCT;	//update bestUCT
@@ -95,7 +106,15 @@ public class MonteCarloTreeSearch {
 			}
 		}
 
-		return bestNode;
+		//if there is an unexplored children
+		if(parent.children.size()!=parent.game.possibleMoves().size()){
+			EvalNode emptyNode = new EvalNode(root.game); //creates an empty node in order uct function
+			if(emptyNode.uct()>bestUCT){ //if that's more interresting to explore a new child
+				return Optional.empty(); //returns empty to stay on current node
+			}
+		}
+
+		return Optional.of(bestNode); //returns the node
 	}
 
 	/**
@@ -143,7 +162,7 @@ public class MonteCarloTreeSearch {
 		/**
 		 * Update playout statistics with a win of the player <code>winner</code>
 		 * Also handles equality if <code>winner</code>={@link PlayerId#NONE}, adding 0.5 wins to each player
-		 * @param winner
+		 * @param winner, the player id of the winner
 		 */
 		public void update(PlayerId winner) {
 			n++;
@@ -172,7 +191,7 @@ public class MonteCarloTreeSearch {
 		
 		/**
 		 * Getter for the number of wins of a player
-		 * @param playerId
+		 * @param playerId the id of the player whose wins are wanted
 		 * @return The number of wins of player <code>playerId</code>
 		 */
 		public double nbWins(PlayerId playerId) {
@@ -205,7 +224,7 @@ public class MonteCarloTreeSearch {
 	
 	/**
 	 * The constructor
-	 * @param game
+	 * @param game the game state from which we start
 	 */
 	public MonteCarloTreeSearch(Game game) {
 		root = new EvalNode(game.clone());
@@ -235,8 +254,18 @@ public class MonteCarloTreeSearch {
 	public EvalNode expand(EvalNode parent){
 
 		List<Move> pool =parent.game.possibleMoves();	//takes the parent's state possible moves
-		Move toPlay = getRandomElement(pool);			//choose randomly a move
 
+		//creates list of already calculated moves
+		List<Move> existingMove = new ArrayList<>();
+		for(EvalNode child : parent.children){
+			EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
+			existingMove.add(englishDraughts.getLastMove());
+		}
+
+		//to have only non existing moves in the pool
+		pool.removeAll(existingMove);
+
+		Move toPlay = getRandomElement(pool);
 		Game etatEnfant = parent.game.clone();  //gets the parent's game
 		etatEnfant.play(toPlay);				//and play the chosen move on it
 
@@ -293,6 +322,13 @@ public class MonteCarloTreeSearch {
 		System.out.println("Stopped search after " 
 		       + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + " ms. "
 		       + "Root stats is " + root.w + "/" + root.n + String.format(" (%.2f%% loss)", 100.0*root.w/root.n));
+		int compteur = 0;
+		for(EvalNode child : root.children){
+			EnglishDraughts englishDraughts = (EnglishDraughts) child.game;
+			System.out.println("Enfant "+compteur+" winrate: "+child.score() + " Move en question: "+ englishDraughts.getLastMove());
+			compteur++;
+		}
+		System.out.println(this.getBestMove());
 	}
 	
 	/**
@@ -311,8 +347,16 @@ public class MonteCarloTreeSearch {
 		// Selection (with UCT tree policy)
 		while(!node.isLeaf()){
 			//tree policy to choose a child
-			node = nodeChoice(node.children);
-			visitedNodes.add(node);
+			Optional<EvalNode> newNode = nodeChoice(node);
+
+			//if we nodeChoice chooses a child, else we go explore another branch
+			if(!newNode.isEmpty()){
+				node= newNode.get();
+				visitedNodes.add(node);
+			}
+			else{
+				break;
+			}
 		}
 
 		//If the leaf isn't a win
@@ -328,15 +372,6 @@ public class MonteCarloTreeSearch {
 			for (EvalNode vNode : visitedNodes) {
 				vNode.updateStats(valeur);
 			}
-
-			//Display the winrate in the actual game state
-			System.out.println("Root winrate: "+root.score());
-			int compteur=0;
-			//Display the winrate for all explored children
-			for(EvalNode child : root.children){
-				System.out.println("Enfant "+compteur+" winrate: "+child.score());
-			}
-
 		}
 		// Return false if tree evaluation should continue
 		return false;
@@ -349,13 +384,13 @@ public class MonteCarloTreeSearch {
 	public Move getBestMove() {
 
 		ArrayList<EvalNode> children = this.root.children;
-		double bestScore = -1;
+		double bestScore = Double.MAX_VALUE;
 		Move bestMove = null;
 
 		//Get node with best score
 		for(EvalNode child : children){
 			double childScore = child.score();
-			if(childScore> bestScore){
+			if(childScore < bestScore){
 				bestScore = childScore;
 
 				EnglishDraughts englishDraughts = (EnglishDraughts) child.game;

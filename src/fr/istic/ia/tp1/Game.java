@@ -15,7 +15,7 @@ public abstract class Game implements Cloneable {
 	 * @author vdrevell
 	 *
 	 */
-	static public interface Move { }
+	public interface Move { }
 	
 	/**
 	 * An enum to represent the current player and the winner in a two-player game.
@@ -23,7 +23,7 @@ public abstract class Game implements Cloneable {
 	 * @author vdrevell
 	 *
 	 */
-	static public enum PlayerId {
+	public enum PlayerId {
 		/** Nobody (e.g equality) */
 		NONE,
 		/** Player 1 */
@@ -87,9 +87,9 @@ public abstract class Game implements Cloneable {
 	}
 	
 	/**
-	 * Human readable name of the players. Can be overrided when players have specific names,
+	 * Human readable name of the players. Can be overridden when players have specific names,
 	 * (e.g. blacks and whites in checkers or chess).
-	 * @param playerId 
+	 * @param playerId, the current Player
 	 * @return the name of the player represented by playerId
 	 */
 	public String playerName(PlayerId playerId) {
