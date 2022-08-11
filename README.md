@@ -1,7 +1,7 @@
 ---
-title: BIF Project Minimapper
+title: English Draughts MCTS
 author: vhulot
-date: 2020-12
+date: 2021-02
 ---
 
 # IA - English Draughts with MCTS (Monte-Carlo Tree Search)
